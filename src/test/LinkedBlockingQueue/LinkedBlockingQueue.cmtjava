@@ -1,0 +1,149 @@
+package test.LinkedBlockingQueue;
+
+import stm.*;
+
+public class LinkedBlockingQueue<E> extends TLinkedBlockingQueue{
+
+	/**
+		Constructors
+	*/
+
+	public LinkedBlockingQueue(int capacity) {
+		super(capacity);
+	}
+
+	public LinkedBlockingQueue() {
+		super();
+    }
+
+    	/**
+    Retrieves and removes the head of this queue, waiting if necessary until an element becomes available.
+	*/
+	public STM<E> take() {
+
+		return new STMDO{
+
+			Integer count <- this.getCount();
+			//Integer capacity <- this.getCapacity();
+			Boolean full <- this.isFull();
+			if (full){//full array
+				STMRTS.retry()
+			}
+			else{
+				E e <- this.extract();
+				STMRTS.stmReturn(e)	
+			}
+		};
+    }
+
+	/**
+     Retrieves and removes the head of this queue, 
+		or returns null if this queue is empty.
+	*/
+	public STM<E> poll() {
+
+		return new STMDO{
+
+			Integer count <- this.getCount();
+			//Integer capacity <- this.getCapacity();
+			Boolean full <- this.isFull();
+			if (full){//full array
+				STMRTS.stmReturn(null)	
+			}
+			else{
+				E e <- this.extract();
+				STMRTS.stmReturn(e)	
+			}
+		};
+    }
+
+	/*Adds the specified element to the tail of this queue, 
+	waiting if necessary for space to become available.
+	*/
+
+	public STM<stm.Void> put(E e){
+		
+		return new STMDO{
+			//Integer count <- this.getCount();
+			//Integer capacity <- this.getCapacity();
+			Boolean full <- this.isFull();
+			if (full){//full array
+				STMRTS.retry()
+			}
+			else{
+				this.insert(e)
+			}
+		};
+	}
+
+	/**
+     * Inserts the specified element at the tail of this queue if it is
+     * possible to do so immediately without exceeding the queue's capacity,
+     * returning true upon success and false if this queue
+     * is full.
+	*/
+    public STM<Boolean> offer(E e) {
+		
+		return new STMDO{
+			//Integer count <- this.getCount();
+			//Integer capacity <- this.getCapacity();
+			Boolean full <- this.isFull();
+			if (full){
+				STMRTS.stmReturn(false)
+			}
+			else{
+				this.insert(e);
+				STMRTS.stmReturn(true)
+			}
+		};
+	}
+
+	/** 
+		Auxiliar Methods
+	*/
+
+    /**
+     * Creates a node and links it at end of queue.
+     */
+    private STM<stm.Void> insert(E x) {
+
+		return new STMDO{
+			Node n <- STMRTS.stmReturn (new Node(x));
+			Node last <- this.getLast();
+			last.setNext(n);
+			this.setLast(n)
+		};
+    }
+
+    /**
+     * Removes a node from head of queue,
+     * returns the node
+     */
+    private STM<E> extract() {
+			return new STMDO{
+		      	Node head <- this.getHead();
+				Node first <- head.getNext();
+				Node second <- first.getNext();
+				head.setNext(second);
+				STMRTS.stmReturn (first)
+			};
+    }
+
+	/**
+	Checks wheather the queue is full or not
+	*/
+    private STM<Boolean> isFull() {
+	
+		return new STMDO{
+
+			Integer count <- this.getCount();
+			Integer capacity <- this.getCapacity();
+			//Boolean full <- this.isFull();
+			if (count != capacity)
+				STMRTS.stmReturn(false)	
+			else
+				STMRTS.stmReturn(true)
+		};	
+				
+	}
+}

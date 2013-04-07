@@ -1,0 +1,144 @@
+package test.LinkedList;
+
+import stm.*;
+
+public class LinkedList<E> extends TList{	
+
+
+	public STM<stm.Void> addFirst(E e) {
+
+		STM<stm.Void> r = new STMDO{
+
+			Node head <- this.getHead();
+			Node<E> node <- STMRTS.stmReturn (new Node(e, head, null));
+			this.setHead(node);
+    		Integer lsize <- this.getSize();
+      		this.setSize(lsize+1);
+			if(lsize.equals(0)){
+				this.setTail(node)
+			}else{
+				node.setNext(head);
+				head.setPrevious(node)
+			}
+		};
+		return r;
+	}
+
+	public STM<stm.Void> addLast(E e) {
+
+		STM<stm.Void> r = new STMDO{
+
+			Node tail <- this.getTail();
+			Node<E> node <- STMRTS.stmReturn (new Node(e, null, tail));
+			this.setTail(node);
+    		Integer lsize <- this.getSize();
+      		this.setSize(lsize+1);
+			if(lsize.equals(0)){
+				this.setHead(node)
+			}else{
+				tail.setNext(node);
+				node.setPrevious(tail)
+			}
+		};
+		return r;
+	}
+
+	public STM<Boolean> contains(E e) {
+
+		STM<Boolean> r = new STMDO{
+			Node head <- this.getHead();
+			this.contains(head, e)
+		};
+		return r;
+	}
+
+	private STM<Boolean> contains(Node curNode, E e) {
+
+		STM<Boolean> r = new STMDO{
+			if(curNode == null) {
+				STMRTS.stmReturn(false)
+			} else {
+				E element <- curNode.getElement();
+				if(element.equals(e)) {
+					STMRTS.stmReturn(true)
+				} else {
+					Node next <- curNode.getNext();
+					contains(next, e)
+				}
+			}
+		};
+		return r;
+	}
+
+	public STM<Boolean> remove(E e) {
+
+		STM<Boolean> r = new STMDO{
+			Node head <- this.getHead();
+			remove(head, e)
+		};
+		return r;
+	}
+
+	private STM<Boolean> remove(Node curNode, E e) {
+
+		STM<Boolean> r = new STMDO{
+			if(curNode==null) {
+				STMRTS.stmReturn(false)
+			} else {
+				Integer element <- curNode.getElement();
+				if(!element.equals(e)) {
+					Node next <- curNode.getNext();
+					remove(next, e)
+				} else {
+					remove(curNode);
+					STMRTS.stmReturn(true)
+				}
+			}
+		};
+		return r;
+	}
+
+	private STM<E> remove(Node<E> node) {
+
+		STM<E> r = new STMDO{
+			Integer lsize <- this.getSize();
+			this.setSize(lsize-1);
+			if(lsize == 1){
+				this.setHead(null);
+				this.setTail(null)
+			}else{
+				Node head <- this.getHead();
+				Node next <- node.getNext();
+				Node previous <- node.getPrevious();
+				if(node == head){
+					this.setHead(next);
+					next.setPrevious(null)
+				}else{
+					Node tail <- this.getTail();
+					if(node == tail){
+						this.setTail(previous);
+						previous.setNext(null)
+					}else{
+						previous.setNext(next);
+						next.setPrevious(previous)
+					}
+				}
+			}
+			node.getElement()
+		};
+		return r;
+	}
+
+	public STM<E> removeFirst() {
+
+		STM<E> r = new STMDO{
+			Node<E> head <- this.getHead();
+			if(head == null){
+					STMRTS.stmReturn(null)
+			}else{
+					STMRTS.stmReturn(this.remove(head))
+			}
+		};
+		return r;
+	}
+}

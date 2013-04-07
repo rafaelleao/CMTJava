@@ -1,0 +1,29 @@
+package test.LinkedBlockingQueue;
+
+import stm.*;
+
+public class TLinkedBlockingQueue<E> implements TObject{
+
+    /** The capacity bound, or Integer.MAX_VALUE if none */
+    private Integer capacity;
+
+    /** Current number of elements */
+    private Integer count;
+
+    /** Head of linked list */
+    private transient Node<E> head;
+
+    /** Tail of linked list */
+    private transient Node<E> last;
+
+    public TLinkedBlockingQueue(int capacity) {
+        if (capacity <= 0) throw new IllegalArgumentException();
+        this.capacity = capacity;
+        last = head = new Node<E>(null);
+    }
+
+    public TLinkedBlockingQueue() {
+        this(Integer.MAX_VALUE);
+    }
+
+}

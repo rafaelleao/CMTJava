@@ -1,0 +1,83 @@
+package test.LinkedBlockingQueue;
+
+import stm.*;
+
+class Main{
+
+	public static void main (String args[])throws Exception {
+
+		LinkedBlockingQueue l = new LinkedBlockingQueue(10);
+		//int commits=0;
+		/*int nthreads = Integer.parseInt(args[0]);
+		Thread t;*/
+		STMRTS.atomic(l.put(9));
+		STMRTS.atomic(l.put(4));
+		Node t = (Node)STMRTS.atomic(l.take());
+		Object i = STMRTS.atomic(t.getItem());
+		System.out.println(i);
+		t = (Node)STMRTS.atomic(l.take());
+		 i = STMRTS.atomic(t.getItem());
+		System.out.println(i);
+//t = (Node)STMRTS.atomic(l.extract());
+//		 i = STMRTS.atomic(t.getItem());
+//		System.out.println(i);
+        /*ThreadRandom vet[] = new ThreadRandom[200];
+		
+		for(int i = 0;i<nthreads; i++){
+			vet[i] = new ThreadRandom(l);
+			vet[i].start();
+	    }
+		
+		Thread.sleep(10000);
+	    
+		//System.out.println(l);
+        for(int i = 0;i<nthreads; i++)   
+			vet[i].cond = false;
+			
+        Thread.sleep(1000);
+
+        for(int i = 0;i<nthreads; i++)
+			commits = commits + vet[i].commits;
+			
+	//	System.out.println("Numero de Commits: "+ commits);
+*/
+	}
+
+}
+/*
+class ThreadRandom extends Thread{
+	public int commits=0;
+    volatile boolean cond = true;
+	private List l;
+
+	ThreadRandom(List l) {
+		this.l = l;
+	}	
+
+	public void run() {
+		
+		Integer v;
+		int operacao;
+
+		while(cond) {
+	    	operacao = 1 + (int) (Math.random()*2); 
+	    	v = (Integer) (int)(5*Math.random()+1);
+
+	    	if(operacao ==1) {
+		    	System.out.println(Thread.currentThread() + " Insert: "+ v);
+		    	STMRTS.atomic(l.addToTail(v));
+				//System.out.println(l);
+		    	commits++;
+		    	//	System.out.println(l);System.out.flush();
+			} else {
+				System.out.println(Thread.currentThread() + " Delete: "+ v);
+				STMRTS.atomic(l.delete(v));
+				
+				commits++;
+			//	System.out.println(l); System.out.flush();
+			}
+			System.out.println(Thread.currentThread() + " " + l);
+     	}
+	}
+}
+*/

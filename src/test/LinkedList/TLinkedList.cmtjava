@@ -1,0 +1,15 @@
+package test.LinkedList;
+import stm.*;
+
+class TLinkedList<E> implements TObject{
+
+	private Node<E> head;
+	private Node<E> tail;
+  	private Integer size;
+
+	TLinkedList() {
+		head = null;
+		tail = null;
+    	size = 0;
+	}
+}

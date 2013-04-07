@@ -1,0 +1,14 @@
+package test.RedBlackTree;
+
+import stm.*;
+
+public class TRedBlackTree implements TObject{
+	
+    private TreeNode root;
+    private static TreeNode EMPTY;
+
+	public TRedBlackTree(){
+		EMPTY = new TreeNode();
+		root = EMPTY;
+	}
+}

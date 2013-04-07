@@ -1,0 +1,770 @@
+package test.RedBlackTree;
+
+import stm.*;
+
+public class RedBlackTree extends TRedBlackTree{
+
+	public STM<Integer> length(){
+
+		return new STMDO{
+			TreeNode root <- this.getRoot();
+      		Integer len <- this.length(root);
+			STMRTS.stmReturn(len)
+		};
+	}
+
+	public STM<Boolean> remove(Integer value){
+
+		return new STMDO{
+			TreeNode root <- this.getRoot();
+			TreeNode target <- this.locate(root, value);
+			TreeNode empty <- this.getEMPTY();
+
+			if(target==empty){
+				STMRTS.stmReturn(false)
+			}else{
+				remove(target);
+				TreeNode root <- this.getRoot();
+				root.setColor(Color.BLACK);  // make sure that root's color is black
+				STMRTS.stmReturn(true)
+			}
+		};
+	}
+
+	public STM<Boolean> insert(Integer value){
+
+		return new STMDO{
+			TreeNode empty <- this.getEMPTY();
+			TreeNode root <- this.getRoot();
+			TreeNode node <- this.insert(root, value);
+
+			if(node == empty){//node is already in the tree
+				STMRTS.stmReturn(false)
+			}else {
+				node.setColor(Color.RED);
+				fixRBTree(node);
+				STMRTS.stmReturn(true)
+			}
+		};
+	}
+
+	private STM<Boolean> remove(TreeNode target){
+
+		return new STMDO{
+			TreeNode root <- this.getRoot();
+			TreeNode empty <- this.getEMPTY();
+
+			if(target==empty){
+				STMRTS.stmReturn(false)
+			}else{
+				TreeNode l <- target.getLeft();
+				TreeNode r <- target.getRight();
+				if(l!=empty && r!=empty){
+					TreeNode successor <- this.successor(target);
+					Integer val <- successor.getValue();
+					target.setValue(val);
+					remove(successor)
+				}else{
+					TreeNode sibling <- this.getSibling(target);
+					Boolean isLeftChild <- isLeftChild(target);
+					TreeNode parent <- target.getParent();
+					if(r!=empty){
+						if(parent==empty){
+							this.setRoot(r);
+							r.setParent(empty)
+						}else{
+							if(isLeftChild){
+								if(r!=empty){
+									parent.setLeft(r);
+									r.setParent(parent)
+								}else{
+									parent.setLeft(empty);
+									target.setParent(null)
+								}
+							}else{
+								if(r!=empty){
+									parent.setRight(r);
+									r.setParent(parent)
+								}else{
+									parent.setRight(empty);
+									target.setParent(null)
+								}
+							}
+						}
+					}else{
+						if(parent==empty){
+							this.setRoot(l);
+							l.setParent(empty)
+						}else{
+							if(isLeftChild){
+								if(l!=empty){
+									parent.setLeft(l);
+									l.setParent(parent)
+								}else{
+									parent.setLeft(empty)
+								}
+							}else{
+								if(l!=empty){
+									parent.setRight(l);
+									l.setParent(parent)
+								}else{
+									parent.setRight(empty)
+								}
+							}
+						}
+					}
+					removeFixUp(target, sibling, isLeftChild);
+					target.setParent(null);
+					target.setRight(null);
+					target.setLeft(null);
+					target.setValue(null)
+				}
+				STMRTS.stmReturn(true)
+			}
+		};
+	}
+
+	private STM<Integer> length(TreeNode node){
+
+		return new STMDO{
+			Integer val <- node.getValue();
+			if(val == null){
+				STMRTS.stmReturn(0)
+			}
+			else {
+				TreeNode l <- node.getLeft();
+				TreeNode r <- node.getRight();
+				Integer rlen <- length(r);
+				Integer llen <- length(l);
+				STMRTS.stmReturn(1+rlen+llen) 
+			}
+		};
+	}
+
+	private STM<stm.Void> fixRBTree(TreeNode node){
+
+		return new STMDO{
+			TreeNode empty <- this.getEMPTY();
+			TreeNode root <- this.getRoot();
+			TreeNode parent <- node.getParent();
+			Color parent_color <- parent.getColor();
+
+			if(node != root && parent_color == Color.RED ){
+
+				TreeNode uncle <- this.getUncle(node);
+				Color color <- uncle.getColor();
+			
+				if(color == Color.RED ){
+			
+					parent.setColor(Color.BLACK);
+					uncle.setColor(Color.BLACK);
+					TreeNode grand <- this.getGrandPa(node);
+					grand.setColor(Color.RED);
+					fixRBTree(grand)				
+				}else {
+
+					Boolean hasRightUncle <- this.isLeftChild(parent);
+					Boolean isLeftChild <- this.isLeftChild(node);
+					if(!hasRightUncle){
+						if(isLeftChild) {
+							rotateRight(parent);
+							node.setColor(Color.BLACK);
+							TreeNode grand <- node.getParent();
+							grand.setColor(Color.RED);
+							rotateLeft(grand);
+							fixRBTree(grand)
+						}else{
+							parent.setColor(Color.BLACK);
+							TreeNode grand <- parent.getParent();
+							grand.setColor(Color.RED);
+							rotateLeft(grand);
+							fixRBTree(node)
+						}
+					}else{
+						if(!isLeftChild) {
+							rotateLeft(parent);
+							node.setColor(Color.BLACK);
+							TreeNode grand <- node.getParent();
+							grand.setColor(Color.RED);
+							rotateRight(grand);
+							fixRBTree(grand)
+						}else{
+							parent.setColor(Color.BLACK);
+							TreeNode grand <- parent.getParent();
+							grand.setColor(Color.RED);
+							rotateRight(grand);
+							fixRBTree(node)
+						}
+					}
+				}
+			}else{
+				root.setColor(Color.BLACK)   // root's color always black
+			}
+		};
+	}
+
+	private STM<stm.Void> deleteFixUp(TreeNode node){
+
+		return new STMDO{
+			TreeNode empty <- this.getEMPTY();
+			TreeNode root <- this.getRoot();
+			TreeNode parent <- node.getParent();
+			Color node_color <- node.getColor();
+
+			if(node != root && node_color == Color.BLACK ){
+
+				TreeNode sibling <- this.getSibling(node);
+				Boolean isLeftChild <- this.isLeftChild(node);
+				Color sibling_color <- sibling.getColor();
+				if(isLeftChild){
+					if(sibling_color == Color.RED){//case1 - right sibling is red
+
+						sibling.setColor(Color.BLACK);
+						parent.setColor(Color.RED);
+						rotateLeft(parent);
+						
+						TreeNode sibling <- parent.getRight();
+						TreeNode right <- sibling.getRight();
+						TreeNode left <- sibling.getLeft();
+						Color lcolor <- left.getColor();
+						Color rcolor <- right.getColor();
+						if(lcolor==Color.BLACK && rcolor==Color.BLACK){
+						//case2 - right sibling is black and its both children are black
+							right.setColor(Color.BLACK);
+							sibling.setColor(Color.RED);
+							deleteFixUp(parent)
+						}else{//one child of right brother is red
+
+							if(rcolor == Color.BLACK){
+								//case3 - right brother's right child is black
+								left.setColor(Color.BLACK);
+								rotateRight(sibling);
+								TreeNode sibling <- parent.getRight();
+			
+								//case4 - right sibling's left child is black
+								TreeNode parent <- node.getParent();
+								Color color <- parent.getColor();
+								sibling.setColor(color);
+								parent.setColor(Color.BLACK);
+								TreeNode right <- sibling.getRight();
+								right.setColor(Color.BLACK);
+								rotateLeft(parent)
+							}else{
+								//case4 - right sibling's left child is black
+								TreeNode parent <- node.getParent();
+								Color color <- parent.getColor();
+								sibling.setColor(color);
+								parent.setColor(Color.BLACK);
+								TreeNode right <- sibling.getRight();
+								right.setColor(Color.BLACK);
+								rotateLeft(parent)
+
+							}
+						}
+					}else{
+
+						TreeNode right <- sibling.getRight();
+						TreeNode left <- sibling.getLeft();
+						Color lcolor <- left.getColor();
+						Color rcolor <- right.getColor();
+						if(lcolor==Color.BLACK && rcolor==Color.BLACK){
+						//case2 - right sibling is black and its both children are black
+							right.setColor(Color.BLACK);
+							sibling.setColor(Color.RED);
+							deleteFixUp(parent)
+						}else{//one child of right brother is red
+
+							if(rcolor == Color.BLACK){
+								//case3 - right brother's right child is black
+								left.setColor(Color.BLACK);
+								rotateRight(sibling);
+								TreeNode sibling <- parent.getRight();
+			
+								//case4 - right sibling's left child is black
+								TreeNode parent <- node.getParent();
+								Color color <- parent.getColor();
+								sibling.setColor(color);
+								parent.setColor(Color.BLACK);
+								TreeNode right <- sibling.getRight();
+								right.setColor(Color.BLACK);
+								rotateLeft(parent)
+							}else{
+								//case4 - right sibling's left child is black
+								TreeNode parent <- node.getParent();
+								Color color <- parent.getColor();
+								sibling.setColor(color);
+								parent.setColor(Color.BLACK);
+								TreeNode right <- sibling.getRight();
+								right.setColor(Color.BLACK);
+								rotateLeft(parent)
+
+							}
+						}
+					}
+					root.setColor(Color.BLACK)   //NO OP
+				}else{
+					root.setColor(Color.BLACK)   //NO OP
+				}
+			}else{
+				root.setColor(Color.BLACK)   // root's color always black
+			}
+			node.setColor(Color.BLACK)   // root's color always black
+		};
+	}
+
+	public STM<TreeNode> getGrandPa(TreeNode node){
+
+		return new STMDO{
+			TreeNode empty <- this.getEMPTY();
+			TreeNode parent <- node.getParent();
+
+			if(parent != empty){
+				TreeNode grandPa <- parent.getParent();
+				if(grandPa != empty){
+					STMRTS.stmReturn(grandPa)
+				}else{
+					STMRTS.stmReturn(empty)
+				}
+			}else {
+				STMRTS.stmReturn(empty)
+			}
+		};
+	}
+
+	public STM<TreeNode> getUncle(TreeNode node){
+
+		return new STMDO{
+			TreeNode empty <- this.getEMPTY();
+			TreeNode grandPa <- this.getGrandPa(node);
+
+			if(grandPa != empty){
+				TreeNode parent <- node.getParent();
+				TreeNode sibling <- this.getSibling(parent);
+				if(sibling != empty){
+					STMRTS.stmReturn(sibling)
+				}else{
+					STMRTS.stmReturn(empty)
+				}
+
+			}else {
+				STMRTS.stmReturn(empty)
+			}
+		};
+	}
+
+	public STM<TreeNode> getSibling(TreeNode node){
+
+		return new STMDO{
+			TreeNode empty <- this.getEMPTY();
+			TreeNode parent <- node.getParent();
+				
+			if(parent != empty){
+				Boolean isLeftChild <- this.isLeftChild(node);
+				if(isLeftChild){
+					TreeNode sibling <- parent.getRight();
+					STMRTS.stmReturn(sibling)
+				}else{
+					TreeNode sibling <- parent.getLeft();
+					STMRTS.stmReturn(sibling)
+				}
+			}else {
+				STMRTS.stmReturn(empty)
+			}
+		};
+	}
+
+	private STM<TreeNode> insert(TreeNode root, Integer value){
+	
+		return new STMDO{
+
+			TreeNode empty <- this.getEMPTY();
+			if(root == empty){
+				TreeNode n <- STMRTS.stmReturn(new TreeNode(value, empty, empty,empty));
+				this.setRoot(n);
+				STMRTS.stmReturn(n)
+			}else{
+				Integer v <- root.getValue();
+				if(v.equals(value)){
+					STMRTS.stmReturn(empty)
+				}else{
+					if(v>value){
+						TreeNode left <- root.getLeft();
+						if(left == empty){
+							TreeNode l <- STMRTS.stmReturn(new TreeNode(value, root, empty,empty));
+							root.setLeft(l);
+							STMRTS.stmReturn(l)
+						}else{
+							insert(left, value)
+						}
+					}else{
+						TreeNode right <- root.getRight();
+						if(right == empty){
+							TreeNode r <- STMRTS.stmReturn(new TreeNode(value, root, empty,empty));
+							root.setRight(r);
+							STMRTS.stmReturn(r)
+						}else{
+							insert(right, value)	
+						}
+					}
+				}
+			}	
+		};	
+	}
+
+	private STM<Boolean> isTerminal(Integer value){
+
+		return new STMDO{
+			TreeNode root <- this.getRoot();
+			TreeNode target <- this.locate(root, value);
+			TreeNode empty <- this.getEMPTY();
+			if(target==empty){
+				STMRTS.stmReturn(false)
+			}else{
+				TreeNode l <- target.getLeft();
+				TreeNode r <- target.getRight();
+				if((l==empty && r!=empty) || (l!=empty && r==empty))//node is terminal
+					STMRTS.stmReturn(true)
+				else
+					STMRTS.stmReturn(false)	
+			}
+		};
+	}
+
+	public STM<Boolean> removeFixUp(TreeNode target, TreeNode sibling, Boolean wasLeftChild){
+
+		return new STMDO{
+			TreeNode empty <- this.getEMPTY();
+			Color color <- target.getColor();
+			if(color == Color.BLACK){
+				//Node being deleted will have at most one child
+				TreeNode lchild <- target.getLeft();
+				if(lchild != empty){
+					Color color <- lchild.getColor();
+					if(color == Color.RED){
+						lchild.setColor(Color.BLACK);
+						STMRTS.stmReturn(false)
+					}else{
+						this.removeFixUp1(target, sibling, wasLeftChild)
+					}
+				}else{
+					TreeNode rchild <- target.getRight();
+					Color color <- rchild.getColor();
+					if(color == Color.RED){
+						rchild.setColor(Color.BLACK);
+						STMRTS.stmReturn(false)
+					}else{
+						this.removeFixUp1(target, sibling, wasLeftChild)
+					}
+				}
+
+			}else{//If we delete a Red node tree still is a Red-Black tree
+
+				STMRTS.stmReturn(false)
+			}
+		};
+	}
+
+	public STM<Boolean> removeFixUp1(TreeNode target, TreeNode sibling, Boolean wasLeftChild){
+
+		return new STMDO{
+			TreeNode empty <- this.getEMPTY();
+			TreeNode parent <- target.getParent();
+			if(parent != empty){//target is not the root
+
+				this.removeFixUp2(target, sibling, wasLeftChild)
+			}else{
+				STMRTS.stmReturn(false)
+			}
+		};
+	}
+
+	public STM<Boolean> removeFixUp2(TreeNode target, TreeNode sibling, Boolean wasLeftChild){
+
+		return new STMDO{
+
+			TreeNode empty <- this.getEMPTY();
+			TreeNode parent <- target.getParent();
+			Color color <- sibling.getColor();
+
+			if(color == Color.RED){
+				parent.setColor(Color.RED);
+				sibling.setColor(Color.BLACK);
+				if(wasLeftChild){
+					TreeNode newSibling <- sibling.getLeft();		
+					rotateLeft(parent);
+					this.removeFixUp3(target, newSibling, wasLeftChild)
+				}else{
+					TreeNode newSibling <- sibling.getRight();
+					rotateRight(parent);
+					this.removeFixUp3(target, newSibling, wasLeftChild)
+				}
+			}else{
+
+				this.removeFixUp3(target, sibling, wasLeftChild)
+				//STMRTS.stmReturn(false)
+			}
+
+		};
+	}
+
+
+	public STM<Boolean> removeFixUp3(TreeNode target, TreeNode sibling, Boolean wasLeftChild){
+
+		return new STMDO{
+
+			TreeNode empty <- this.getEMPTY();
+			TreeNode parent <- target.getParent();
+			TreeNode lchild <- sibling.getLeft();
+			TreeNode rchild <- sibling.getRight();
+			Color pcolor <- parent.getColor();
+			Color scolor <- sibling.getColor();
+			Color rcolor <- rchild.getColor();
+			Color lcolor <- lchild.getColor();
+			if(pcolor == Color.BLACK && scolor == Color.BLACK &&
+			  rcolor  == Color.BLACK && lcolor == Color.BLACK){
+
+				sibling.setColor(Color.RED);			
+
+				TreeNode sibling <- this.getSibling(parent);
+				boolean isLeftChild <- this.isLeftChild(parent);
+				this.removeFixUp1(parent, sibling, isLeftChild)
+			}else{
+
+				this.removeFixUp4(target, sibling, wasLeftChild)
+			}
+		};
+	}
+
+	public STM<Boolean> removeFixUp4(TreeNode target, TreeNode sibling, Boolean wasLeftChild){
+
+		return new STMDO{
+			TreeNode empty <- this.getEMPTY();
+			TreeNode parent <- target.getParent();
+			TreeNode lchild <- sibling.getLeft();
+			TreeNode rchild <- sibling.getRight();
+			Color pcolor <- parent.getColor();
+			Color scolor <- sibling.getColor();
+			Color rcolor <- rchild.getColor();
+			Color lcolor <- lchild.getColor();
+
+			if(pcolor == Color.RED && scolor == Color.BLACK &&
+				rcolor == Color.BLACK && lcolor == Color.BLACK){
+				sibling.setColor(Color.RED);
+				parent.setColor(Color.BLACK);
+				STMRTS.stmReturn(true)
+			}else{
+				this.removeFixUp5(target, sibling, wasLeftChild)
+			}
+		};
+	}
+
+	public STM<Boolean> removeFixUp5(TreeNode target, TreeNode sibling, Boolean wasLeftChild){
+
+		return new STMDO{
+			TreeNode empty <- this.getEMPTY();
+			TreeNode parent <- target.getParent();
+			Color scolor <- sibling.getColor();
+			if(scolor == Color.BLACK){
+				TreeNode lchild <- sibling.getLeft();
+				TreeNode rchild <- sibling.getRight();
+				Color rcolor <- rchild.getColor();
+				Color lcolor <- lchild.getColor();
+
+				if(wasLeftChild && rcolor == Color.BLACK && lcolor == Color.RED){
+					sibling.setColor(Color.RED);
+					lchild.setColor(Color.BLACK);
+					rotateRight(sibling);
+					this.removeFixUp6(target, lchild, wasLeftChild)
+				}else{
+
+					if(!wasLeftChild && rcolor == Color.RED && lcolor == Color.BLACK){
+						sibling.setColor(Color.RED);
+						rchild.setColor(Color.BLACK);
+						rotateLeft(sibling);
+						this.removeFixUp6(target, rchild, wasLeftChild)
+					}else{
+
+						this.removeFixUp6(target, sibling, wasLeftChild)
+					}
+				}
+			}else{
+				this.removeFixUp6(parent, sibling, wasLeftChild)
+			}
+		};
+	}
+
+	public STM<Boolean> removeFixUp6(TreeNode target, TreeNode sibling, Boolean wasLeftChild){
+
+		return new STMDO{
+
+			TreeNode empty <- this.getEMPTY();
+			TreeNode parent <- target.getParent();
+			TreeNode lchild <- sibling.getLeft();
+			TreeNode rchild <- sibling.getRight();
+			Color pcolor <- parent.getColor();
+			sibling.setColor(pcolor);
+			parent.setColor(Color.BLACK);
+
+			Color scolor <- sibling.getColor();
+			Color rcolor <- rchild.getColor();
+			Color lcolor <- lchild.getColor();
+			if(wasLeftChild){
+
+				rchild.setColor(Color.BLACK);
+				rotateLeft(parent);
+				STMRTS.stmReturn(true)
+			}else{
+				lchild.setColor(Color.BLACK);
+				rotateRight(parent);
+				STMRTS.stmReturn(true)
+			}
+		};
+	}
+	
+	public STM<TreeNode> locate(TreeNode root, Integer value){
+	
+		return new STMDO{
+
+			TreeNode empty <- this.getEMPTY();
+			if(root == empty){
+
+				STMRTS.stmReturn(empty)
+			}else{
+				Integer v <- root.getValue();
+			  if(v.equals(value)){
+				  STMRTS.stmReturn(root)
+			  }else{
+				  if(v>value){
+					  TreeNode left <- root.getLeft();
+					  locate(left, value)
+				  }else{
+					  TreeNode right <- root.getRight();
+					  locate(right, value)
+				  }
+			  }
+			}	
+		};	
+	}
+
+	public STM<Boolean> find(Integer value){
+	
+		return new STMDO{
+
+			TreeNode root <- this.getRoot();
+			TreeNode node <- this.locate(root, value);
+			TreeNode empty <- this.getEMPTY();
+			STMRTS.stmReturn(node != empty)
+		};	
+
+	}
+
+	private STM<Boolean> isLeftChild(TreeNode node){
+
+		return new STMDO{
+			TreeNode parent <- node.getParent();
+			TreeNode left <- parent.getLeft();
+			if(left.equals(node)){
+				STMRTS.stmReturn(true)
+			}else{
+				STMRTS.stmReturn(false)
+			}
+		};
+
+	}
+
+	public STM<TreeNode> rotateLeft(TreeNode node){
+
+		return new STMDO{
+			TreeNode empty <- this.getEMPTY();
+			TreeNode tempNode <- node.getRight();
+			TreeNode left <- tempNode.getLeft();
+			node.setRight(left);
+			left.setParent(node);
+
+			TreeNode parent <- node.getParent();
+			
+			if(parent == empty){
+				this.setRoot(tempNode);
+				tempNode.setParent(empty)
+			}else{
+				Boolean isLeftChild <- this.isLeftChild(node);
+				if(isLeftChild){
+					parent.setLeft(tempNode)
+				}else{
+					parent.setRight(tempNode)
+				}
+				tempNode.setParent(parent)
+			}
+		
+			tempNode.setLeft(node);
+			node.setParent(tempNode);
+			STMRTS.stmReturn(node)
+		};
+	}
+
+	public STM<TreeNode> rotateRight(TreeNode node){
+
+		return new STMDO{
+			TreeNode empty <- this.getEMPTY();
+			TreeNode tempNode <- node.getLeft();
+			TreeNode right <- tempNode.getRight();
+			node.setLeft(right);
+			right.setParent(node);
+
+			TreeNode parent <- node.getParent();
+			
+			if(parent == empty){
+				this.setRoot(tempNode);
+				tempNode.setParent(empty)
+			}else{
+				Boolean isLeftChild <- this.isLeftChild(node);
+				if(isLeftChild){
+					parent.setLeft(tempNode)
+				}else{
+					parent.setRight(tempNode)
+				}
+				tempNode.setParent(parent)
+			}
+		
+			tempNode.setRight(node);
+			node.setParent(tempNode);
+			STMRTS.stmReturn(node)
+		};
+	}
+
+	public STM<TreeNode> successor(TreeNode node){
+
+		return new STMDO{
+			TreeNode rchild <- node.getRight();
+			TreeNode empty <- this.getEMPTY();
+			if(rchild == empty){
+				STMRTS.stmReturn(empty)
+			}else{
+				leftmostChild(rchild)
+			}
+		};
+	}
+
+	private STM<TreeNode> leftmostChild(TreeNode node){
+
+		return new STMDO{
+			TreeNode lchild <- node.getLeft();
+			TreeNode empty <- this.getEMPTY();
+			if(lchild == empty){
+				STMRTS.stmReturn(node)
+			}else{
+				leftmostChild(lchild)
+			}
+		};
+	}
+
+	private STM<stm.Void> exchangeNodes(TreeNode a, TreeNode b){
+
+		return new STMDO{
+			Integer a_value <- a.getValue();
+			Integer b_value <- b.getValue();
+			a.setValue(b_value);
+			b.setValue(a_value)
+		};
+	}					
+}

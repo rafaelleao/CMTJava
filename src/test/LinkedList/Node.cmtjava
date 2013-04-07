@@ -1,0 +1,17 @@
+package test.LinkedList;
+
+import stm.*;
+
+class Node<E> implements TObject{
+
+	private E element;
+	private Node<E> next;
+	private Node<E> previous;
+
+	Node(E element, Node next, Node previous) {
+		this.element = element;
+		this.next = next;
+		this.previous = previous;
+	}
+}
+

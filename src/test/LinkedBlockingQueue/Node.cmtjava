@@ -1,0 +1,14 @@
+package test.LinkedBlockingQueue;
+
+import stm.*;
+
+class Node<E> implements TObject{
+
+	private E item;
+	private Node<E> next;
+
+	Node(E x) {
+		this.item = x;
+	}
+}
+

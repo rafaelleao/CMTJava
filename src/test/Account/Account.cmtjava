@@ -1,0 +1,39 @@
+package test.Account;
+
+import stm.*;
+
+class Account extends TAccount{
+
+	public STM<stm.Void> deposit (Double n) {
+		
+		return new STMDO{
+			Double balance <- this.getBalance();
+			this.setBalance(balance + n);
+			Integer ops <- this.getOps();
+			this.setOps(ops+1)
+		};
+	}
+
+	public STM<stm.Void> withdraw (Double n) {
+		
+		return new STMDO{
+
+			Integer ops <- this.getOps();
+			this.setOps(ops+1);
+			Double balance <- this.getBalance();
+
+			if(balance>=n)
+				this.setBalance(balance - n)
+			else
+				STMRTS.retry()
+		};
+	}
+
+	public STM<stm.Void> transfer(Account dest, Double n){
+	
+		return new STMDO{
+			this.withdraw(n);
+			dest.deposit(n)
+		};
+	}
+}

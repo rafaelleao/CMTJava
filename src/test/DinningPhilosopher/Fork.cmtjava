@@ -1,0 +1,9 @@
+package test.DinningPhilosopher;
+
+import stm.*;
+
+class Fork implements TObject{
+
+	private volatile Boolean fork = true;
+}
+
