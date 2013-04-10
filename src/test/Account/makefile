@@ -1,4 +1,4 @@
-JCC = java -jar ../../../cmtjavac.jar
+JCC = $(CMTJAVAC)/cmtjavac
 
 JFLAGS = -cp ../../../build:. -d ../../../build/
 

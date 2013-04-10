@@ -1,0 +1,92 @@
+group cmtJava;
+
+fieldDec(id, idUpper, field, type) ::=
+<<<field><\n\t>private FieldInfo\<<type>\> <id>FieldInfo = new FieldInfo\<<type>\> ("<id>", {<type> a => <id> = a; });
+	
+	public STM\<stm.Void\> set<idUpper> (<type> n) {
+		
+		return new STM\<stm.Void\>({Trans t =>
+			TResult r = null;
+			boolean mark[] = {false};
+			Long version = <id>FieldInfo.wlock.get(mark);
+		    if(mark[0] && t.transId.equals(version)){
+		    	assert(<id>FieldInfo.wlock.isMarked() && <id>FieldInfo.wlock.getReference().equals(t.transId));
+				t.writeSet.put(<id>FieldInfo, n);
+				r = new TResult(new stm.Void(), t, Trans.Status.ACTIVE);
+			}else{
+				if(<id>FieldInfo.wlock.compareAndSet(null, t.transId, false, true)){
+					t.writeSet.put(<id>FieldInfo, n);
+					if (<id>FieldInfo.rlock.getReference() > t.validationStamp && !t.extend()){
+						r = new TResult(null, t, Trans.Status.ABORTED);
+					}else
+						r = new TResult(new stm.Void(), t, Trans.Status.ACTIVE);
+					}
+				else{
+					r = new TResult(null, t, Trans.Status.ABORTED);
+				}
+			}		
+			r
+		});
+	}
+
+	public STM\<<type>\> get<idUpper>() {
+		
+		return new STM\<<type>\> ({Trans t =>
+			TResult r = null;
+			<type> result;
+			boolean mark[] = {false};
+			Long version = <id>FieldInfo.wlock.get(mark);
+			
+	    	if(mark[0] && t.transId.equals(version)){
+	    		assert(<id>FieldInfo.wlock.isMarked() && <id>FieldInfo.wlock.getReference().equals(t.transId));
+				result = (<type>)t.writeSet.get(<id>FieldInfo);
+				r = new TResult(result, t, Trans.Status.ACTIVE);
+			}else{
+		   		version = <id>FieldInfo.rlock.get(mark);
+				while(true){
+					if(mark[0]==true){
+						version = <id>FieldInfo.rlock.get(mark);
+						continue;
+					}
+
+					result = <id>;
+					long version2 = <id>FieldInfo.rlock.get(mark);
+					if(version == version2 && mark[0]==false) break;
+					version=version2;
+				}
+
+				boolean added = t.readSet.put(<id>FieldInfo, version);
+				if (!added || (version > t.validationStamp && !t.extend()) ){
+					r = new TResult(null, t, Trans.Status.ABORTED);
+				}else{
+					r = new TResult(result, t, Trans.Status.ACTIVE);	
+				}
+			}	
+
+			r
+		});
+	} >>
+
+stmdoBlock(head, tail) ::= <<
+<head> <tail>
+>>
+
+bind(expression, id, type) ::= <<
+STMRTS.bind( <expression>,{ <type> <id> => 
+
+>>
+
+then(expression) ::= <<
+STMRTS.then( <expression>, 
+
+>>
+
+if(cond, block1, block2) ::= <<
+<cond> ? <block1> 
+	   : <block2>
+>>
+
+block(begin, end) ::= <<
+<begin> <end>
+>>
+

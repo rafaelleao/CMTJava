@@ -1,6 +1,6 @@
 #!/bin/bash
 
-compiler=~/.cmtjavac/closures/bin/java
+compiler=$CMTJAVAC/cmtjava
 parameters="-ea -cp build"
 
 echo "Testing Account"

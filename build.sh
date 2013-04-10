@@ -1,12 +1,13 @@
 #!/bin/bash
 
-echo 
-"***************
-Compiling CMTJava
-**************"
+echo "*****************"
+echo "Compiling CMTJava"
+echo "*****************"
 make -C src/stm/
 
+echo "*****************"
 echo "Compiling samples"
+echo "*****************"
 make -C src/test/DinningPhilosopher/
 make -C src/test/RedBlackTree/
 make -C src/test/LinkedList/

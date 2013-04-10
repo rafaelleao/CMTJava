@@ -2,8 +2,7 @@ package test.LinkedList;
 
 import stm.*;
 
-public class LinkedList<E> extends TList{	
-
+public class LinkedList<E> extends TLinkedList{	
 
 	public STM<stm.Void> addFirst(E e) {
 

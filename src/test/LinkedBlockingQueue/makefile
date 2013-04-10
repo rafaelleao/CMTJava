@@ -1,4 +1,4 @@
-JCC = java -jar ../../../cmtjavac.jar
+JCC = $(CMTJAVAC)/cmtjavac
 
 JFLAGS = -cp ../../../build:. -d ../../../build/
 
@@ -17,6 +17,5 @@ Main.class: Main.cmtjava
 	$(JCC) $(JFLAGS) Main.cmtjava
 
 clean: 
-	$(RM) *.class
 	$(RM) *.java
 				

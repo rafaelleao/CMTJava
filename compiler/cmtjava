@@ -1,0 +1,2 @@
+#!/bin/sh
+$CMTJAVAC/closures/bin/java $@

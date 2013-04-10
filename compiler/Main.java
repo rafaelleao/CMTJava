@@ -68,8 +68,8 @@ public class Main {
 		CMTJavaParser parser = new CMTJavaParser(tokens);
 		parser.setTemplateLib(templates);
 
-		CMTJavaParser.compilationUnit_return r = parser.compilationUnit();// parse rule compilationUnit
-		StringTemplate output = (StringTemplate)r.getTemplate();
+		/*CMTJavaParser.compilationUnit_return r = */parser.compilationUnit();// parse rule compilationUnit
+		//StringTemplate output = (StringTemplate)r.getTemplate();
 
 		try { 
 			BufferedWriter out = new BufferedWriter(new FileWriter(source+".java")); 
