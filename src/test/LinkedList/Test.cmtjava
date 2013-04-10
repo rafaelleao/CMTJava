@@ -19,10 +19,8 @@ class Test {
 		for(int i = 0;i<nthreads; i++) {
 			vet[i].join();
 		}
-		//System.out.print("List: ");
-    //	print((Node<Integer>)STMRTS.atomic(l.getHead()));
-		//System.out.println("List size: "+ STMRTS.atomic(l.getSize()));
-    	assert( STMRTS.atomic(l.getSize()).equals(nops*nthreads) );
+
+    assert( STMRTS.atomic(l.getSize()).equals(nops*nthreads) );
 		for(int i = 0;i<nthreads; i++) {
 			vet[i] = new ThreadRandom(l, nops, ThreadRandom.OP_TYPE_REMOVE, nthreads*nops);
 			vet[i].start();
@@ -31,16 +29,13 @@ class Test {
 		for(int i = 0;i<nthreads; i++) {
 			vet[i].join();
 		}
-   // print(STMRTS.atomic(l.getHead()));
 
 		int commits = 0;
 		for(int i = 0;i<nthreads; i++) {
 			commits += vet[i].removes;
 		}
 
-		System.out.println("commits: "+ commits);
-		System.out.println("List size: "+ STMRTS.atomic(l.getSize()));
-    	assert( (Integer)STMRTS.atomic(l.getSize())+commits==nops*nthreads );
+    assert( (Integer)STMRTS.atomic(l.getSize())+commits==nops*nthreads );
 	}
 
 	public static <E> void print(Node<E> node){
