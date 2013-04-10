@@ -1,0 +1,50 @@
+2008-08-11
+
+	Compiler crash on some closures that can't complete normally
+	but which are assigned to a variable of a function type with a
+	primitive result type.
+
+2008-08-04
+
+	Other nonlocal transfers now implemented.
+	Transfers are now mostly transparent to catch clauses.
+
+2008-08-02
+
+	Nonlocal returns are now implemented.
+
+2008-07-13
+
+	The "for" qualifier on methods is now preserved in the class
+	file using a classfile attribute.  Previously the qualifier
+	was only noticed by the compiler if the API is compiled from
+	sources at the same time as its clients.
+
+2008-07-07
+
+	Resolved some cases that would cause a failure to parse or a
+	crash in semantic processing of eta expansion expressions in
+	which the qualifying type has a wildcard argument.
+
+2008-07-06
+
+	The closure conversion from an unrestricted closure to a
+	restricted type doesn't exist.  It used to exist as a
+	conversion but generate an error, which had unfortunate
+	effects on overload resolution.
+
+	Eta expressions produce restricted closures.
+
+2008-07-05
+
+	Eliminate most "capture of ? super" appearing in diagnostics.
+	This improves many errors involving function types.
+
+	Diagnotics involving closures now properly use => or ==>
+	depending on how the closure itself was written.
+
+2008-07-04
+
+	This version of the prototype is functionally equivalent to
+	the previous version distributed on 2008-05-11, but unlike the
+	previous version is now licensed under GPLv2.

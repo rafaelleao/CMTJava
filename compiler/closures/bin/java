@@ -1,0 +1,4 @@
+#! /bin/bash
+
+CLOSURES=$(cd `dirname $0` ; cd .. ; /bin/pwd)
+java -Xbootclasspath/p:${CLOSURES}/lib/closures.jar "$@"

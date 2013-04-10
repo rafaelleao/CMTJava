@@ -5,17 +5,12 @@ INSTALLATION/USAGE GUIDE FOR CMTJava
 
 This distribution contains the following files:
 
-compiler/								The CMTJAVA compilation tool's source files
-
 src/
 	test/									Test programs written in CMTJava
-	stm/			
+	stm/									CMTJava's transaction support library
 
-compile_samples.sh &		Scripts for compiling and running the sample programs
-test_samples.sh
-
-cmtjavac.jar						A read-to-use version of the CMTJAVA compilation tool
-
+build.sh								Scripts for compiling the library code and the samples
+test_samples.sh					Script to run the sample programs
 
 --------------------
 1. REQUIRED SOFTWARE 
@@ -23,8 +18,7 @@ cmtjavac.jar						A read-to-use version of the CMTJAVA compilation tool
 
  1. Sun's Java(TM) JDK (tested with Java 1.7 but should also work with Java 1.6)
  2. make
- 3. BGGA closures (for using closures in Java)
-
+ 3. BGGA closures (for using closures in Java - include under "compiler" folder)
 
 -------------------------------------------------------
 2. INSTALLATION
@@ -32,14 +26,12 @@ cmtjavac.jar						A read-to-use version of the CMTJAVA compilation tool
 
 To work properly, the CMTJAVA compilation tool needs to find where the template file and the
 closures folder are located.
-
-    1) SET THE :  
        
 			Set the CMTJAVAC environment variable with the path where the template file (CMTJava.stg)
 			and the root folder of the BGGA closures files are. Both the template file and the
 			closures folder are located in the "compiler" folder.
 			Example (if you extracted the cmtjava package to the desktop): 
-				export CMTJAVAC=~/Desktop/cmtjava/compiler/
+			export CMTJAVAC=~/Desktop/cmtjava/compiler/
 
 ---------------------------------
 3. USAGE
@@ -61,10 +53,10 @@ The usage of CMTJava is divided into two parts:
 	compilation tool will look for the BGGA compiler in the folder $CMTJAVAC/closures/bin/javac 
 
 	For compiling the file called Foo.cmtjava, you need to type:
-	$> java -jar cmtjavac.jar Foo.cmtjava
+	$> $CMTJAVAC/cmtjavac Foo.cmtjava
 
-	You can also pass arguments to compiler.
-	$> java -jar cmtjavac.jar -cp pathForClasses:. -d bin Foo.cmtjava
+	You can also pass arguments to compiler, an in pure Java.
+	$> $CMTJAVAC/cmtjavac -cp pathForClasses:. -d bin Foo.cmtjava
 
 
 ---------------------------------
@@ -72,14 +64,14 @@ The usage of CMTJava is divided into two parts:
 ---------------------------------
 
 To run the classes generated, just instantiante the Java virtual machine of the BGGA closures library. Example:
-	$> $CMTJAVAC/closures/bin/java Foo
+	$> $CMTJAVAC/cmtjava Foo
 
 ---------------------------------
 4. COMPILE THE SAMPLE FILES
 ---------------------------------
 
 In this package, there's a script to compile the sample files. 
-To compile the sample data structures in CMTJava, just run the script "compile_samples.sh"
+To compile the sample data structures in CMTJava, just run the script "build.sh"
 To test if the sample files are working, execute the "test_samples.sh" script
 
 

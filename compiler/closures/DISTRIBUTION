@@ -1,0 +1,21 @@
+		CLOSURES FOR JAVA PROTOTYPE
+
+This distribution includes what is needed to try out the prototype
+Closures language feature for Java.  To use the prototype, you will
+need to have an existing installation of JDK 1.5 or later on your
+path.  Place the enclosed closures.jar on your VM's bootstrap
+classpath when compiling using javac, and when running the resulting
+programs.  Enclosed in the bin directory are some scripts that may be
+helpful in doing that.
+
+This is distributed entirely under the GPLv2 license, a copy of which
+is enclosed.  The sources for this prototype were derived from
+openjdk7, and appear in the mercurial forest that can be found at
+
+	ssh://hg.openjdk.java.net/closures/closures/
+	http://hg.openjdk.java.net/closures/closures/
+
+Specifications, tutorials, and other documentation related to this
+prototype can be found at
+
+	http://www.javac.info/
