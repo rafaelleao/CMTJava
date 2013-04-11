@@ -13,9 +13,13 @@ This distribution contains the following files:
 
  1. Sun's Java(TM) JDK (tested with Java 1.7 but should also work with Java 1.6)
  2. make
- 3. BGGA closures (for using closures in Java - include under "compiler" folder)
+ 3. BGGA closures (for using closures in Java - included under "compiler" folder)
 
 ##2. INSTALLATION
+
+First of all, clone the repository or download it as a 
+zip file on this [link](https://github.com/rafaelleao/CMTJava/archive/master.zip)
+
 
 After downloading the files, you can run the installation script (located at the root folder) with this command:
 
